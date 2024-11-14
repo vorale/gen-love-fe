@@ -107,7 +107,7 @@ export const InputArea = ({ onMessageSend, messages = [], inputText, setInputTex
 				},
 				body: JSON.stringify({
 					inputs: {
-						user_input: inputText.trim()
+						user_input: lastMsg.content.text
 					},
 					response_mode: "blocking",
 					user: lastMsg.owner
