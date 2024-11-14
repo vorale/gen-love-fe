@@ -90,8 +90,8 @@ export const InputArea = ({ onMessageSend, messages = [], inputText, setInputTex
 	const handleSuggestionsOpen = async () => {
 		setIsSuggestionsOpen(true)
 		setIsLoading(true)
-		const lastMsg = messages[messages.length-1]
-		console.log("lastMsg", lastMsg)
+		const lastMsg = messages[0]
+		console.log("lastMsg", messages)
 
 		if(lastMsg && lastMsg.content && lastMsg.content.text) {
 		// First API call for suggestions
