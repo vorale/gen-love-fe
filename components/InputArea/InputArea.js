@@ -7,6 +7,7 @@ export const InputArea = ({ onMessageSend, messages = [], inputText, setInputTex
 	const [selectedImage, setSelectedImage] = useState(null)
 	const [lastAudioKey, setLastAudioKey] = useState(null)
 	const fileInputRef = useRef(null)
+	const [isSending, setIsSending] = useState(false)
 
 	const getConversationHistory = () => {
 		// Get last 3 messages only to keep context manageable
@@ -136,6 +137,7 @@ export const InputArea = ({ onMessageSend, messages = [], inputText, setInputTex
 
 	const handleFormSubmit = async (e) => {
 		e.preventDefault()
+		setIsSending(true)
 		console.log("inputText", inputText)
 		if(typeof inputText === 'array') inputText = inputText[0]
 		if (!inputText.trim() && !selectedImage) return
@@ -148,7 +150,7 @@ export const InputArea = ({ onMessageSend, messages = [], inputText, setInputTex
 			await onMessageSend(inputText.trim())
 		}
 
-		
+		setIsSending(false)
 
 		// Clear input
 		setInputText('')
@@ -205,6 +207,7 @@ export const InputArea = ({ onMessageSend, messages = [], inputText, setInputTex
 					</Button>
 					<Button 
 						type="submit" 
+						isLoading={isSending}
 						variation="primary"
 						size="medium"
 						style={{
