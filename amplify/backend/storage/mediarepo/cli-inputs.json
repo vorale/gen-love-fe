@@ -1,0 +1,14 @@
+{
+  "resourceName": "mediarepo",
+  "policyUUID": "464ac250",
+  "bucketName": "amplifynextjschatappe467b698899b41e3b4b88ef2124",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ],
+  "triggerFunction": "NONE",
+  "groupAccess": {}
+}

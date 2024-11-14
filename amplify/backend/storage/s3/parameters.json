@@ -1,0 +1,9 @@
+{
+    "permissions": {
+        "auth": {
+            "read": true,
+            "write": true
+        }
+    },
+    "allowedFileTypes": ["image/*", "audio/*"]
+} 
