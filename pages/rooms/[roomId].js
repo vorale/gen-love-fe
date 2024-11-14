@@ -22,6 +22,8 @@ function RoomPage({ roomsList, currentRoomData, username }) {
 	const [currentRoom, setCurrentRoom] = useState(currentRoomData)
 	const [suggestions, setSuggestions] = useState([])
 	const [inputText, setInputText] = useState('')
+	const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false)
+	const [isLoading, setIsLoading] = useState(false)
 
 	// const fetchSuggestions = async (messages, newMessage = '') => {
 	// 	try {
@@ -97,6 +99,7 @@ function RoomPage({ roomsList, currentRoomData, username }) {
 
 	const handleSuggestionClick = (suggestion) => {
 		setInputText(suggestion);
+		setIsSuggestionsOpen(false)
 	};
 
 	const handleSuggestionsReceived = (suggestionsOrUpdater) => {
@@ -166,13 +169,18 @@ function RoomPage({ roomsList, currentRoomData, username }) {
 							</Heading>
 							<Flex direction="column" height="85vh">
 								<MessageList 
+									isLoading={isLoading}
+									isSuggestionsOpen={isSuggestionsOpen}
 									messages={messages} 
 									myUsername={username} 
 									suggestions={suggestions}
 									onSuggestionClick={handleSuggestionClick}
 								/>
 								<InputArea 
+									setIsSuggestionsOpen={setIsSuggestionsOpen}
 									onMessageSend={handleMessageSend} 
+									setIsLoading={setIsLoading}
+									isLoading={isLoading}
 									messages={messages}
 									inputText={inputText}
 									setInputText={setInputText}

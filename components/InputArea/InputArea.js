@@ -3,7 +3,7 @@ import { useRef, useState } from 'react'
 import { Storage } from 'aws-amplify'
 import { VoiceRecorder } from '../VoiceRecorder/VoiceRecorder'
 
-export const InputArea = ({ onMessageSend, messages = [], inputText, setInputText, onSuggestionsReceived }) => {
+export const InputArea = ({ onMessageSend, messages = [], inputText, setInputText, onSuggestionsReceived, setIsSuggestionsOpen, setIsLoading, isLoading}) => {
 	const [selectedImage, setSelectedImage] = useState(null)
 	const [lastAudioKey, setLastAudioKey] = useState(null)
 	const fileInputRef = useRef(null)
@@ -84,22 +84,10 @@ export const InputArea = ({ onMessageSend, messages = [], inputText, setInputTex
 			console.error('Error fetching suggestions:', error);
 		}
 	};
-	
 
-	const handleFormSubmit = async (e) => {
-		e.preventDefault()
-		console.log("inputText", inputText)
-		if(typeof inputText === 'array') inputText = inputText[0]
-		if (!inputText.trim() && !selectedImage) return
-
-		let key
-		if (selectedImage) {
-			key = await uploadFile(selectedImage)
-			await onMessageSend(inputText.trim(), key, 'image')
-		} else {
-			await onMessageSend(inputText.trim())
-		}
-
+	const handleSuggestionsOpen = async () => {
+		setIsSuggestionsOpen(true)
+		setIsLoading(true)
 		// First API call for suggestions
 		await fetchSuggestions(inputText.trim())
 
@@ -142,6 +130,25 @@ export const InputArea = ({ onMessageSend, messages = [], inputText, setInputTex
 		} catch (error) {
 			console.error('Error fetching streaming suggestion:', error);
 		}
+		setIsLoading(false)
+	}
+	
+
+	const handleFormSubmit = async (e) => {
+		e.preventDefault()
+		console.log("inputText", inputText)
+		if(typeof inputText === 'array') inputText = inputText[0]
+		if (!inputText.trim() && !selectedImage) return
+
+		let key
+		if (selectedImage) {
+			key = await uploadFile(selectedImage)
+			await onMessageSend(inputText.trim(), key, 'image')
+		} else {
+			await onMessageSend(inputText.trim())
+		}
+
+		
 
 		// Clear input
 		setInputText('')
@@ -170,6 +177,7 @@ export const InputArea = ({ onMessageSend, messages = [], inputText, setInputTex
 				>
 					<TextField
 						flex="1"
+						width="60%"
 						placeholder="Type your message..."
 						value={inputText}
 						onChange={(e) => setInputText(e.target.value)}
@@ -177,20 +185,34 @@ export const InputArea = ({ onMessageSend, messages = [], inputText, setInputTex
 						size="large"
 						style={{
 							minWidth: '75%',
+							margintop:"-15px",
 							height: '40px'
 						}}
 					/>
 					<VoiceRecorder onVoiceRecorded={handleVoiceRecorded} />
 					<Button 
 						type="submit" 
+						isLoading={isLoading}
 						variation="primary"
-						size="large"
+						size="medium"
+						onClick={() => handleSuggestionsOpen()}
+						style={{
+							width: '160px',
+							height: '40px'
+						}}
+					>
+						一点提示
+					</Button>
+					<Button 
+						type="submit" 
+						variation="primary"
+						size="medium"
 						style={{
 							width: '80px',
 							height: '40px'
 						}}
 					>
-						Send
+						发送
 					</Button>
 				</Flex>
 			</form>

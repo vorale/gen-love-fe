@@ -1,10 +1,10 @@
-import { Flex, TextAreaField } from '@aws-amplify/ui-react'
+import { Flex, TextAreaField, Loader } from '@aws-amplify/ui-react'
 import { MessageItem } from './index'
 
-export const MessageList = ({ messages = [], myUsername, suggestions = [], onSuggestionClick }) => {
+export const MessageList = ({ messages = [], myUsername, isLoading, isSuggestionsOpen = false, suggestions = [], onSuggestionClick }) => {
 	// console.log('MessageList received suggestions:', suggestions);
 	// console.log('Current suggestions in MessageList:', suggestions);
-	
+	console.log("isSuggestionsOpen", isSuggestionsOpen)
 	return (
 		<>
 			<Flex
@@ -22,37 +22,42 @@ export const MessageList = ({ messages = [], myUsername, suggestions = [], onSug
 			<Flex
 				direction="column"
 				padding="0.5rem"
+				display={isSuggestionsOpen ? "block" : "none"}
+				// visibility={isSuggestionsOpen ? "visible" : "hidden"}
 				backgroundColor="#f5f5f5"
 				minHeight="25px"
 				gap="0.25rem"
 			>
-				{[0, 1, 2].map((index) => (
-					<TextAreaField
-						key={index}
-						isReadOnly={true}
-						value={suggestions[index] || "Waiting for suggestions..."}
-						backgroundColor="white"
-						autoHeight={true}
-						minHeight="16px"
-						maxHeight="50px"
-						padding="2px 8px"
-						style={{
-							resize: 'none',
-							overflow: 'auto',
-							lineHeight: '1.2',
-							fontSize: '13px',
-							border: '1px solid #ccc',
-							borderRadius: '4px',
-							marginBottom: '2px',
-							cursor: 'pointer'
-						}}
-						onClick={() => {
-							if (suggestions[index]) {
-								onSuggestionClick(suggestions[index]);
-							}
-						}}
-					/>
-				))}
+				{isLoading?(<Loader></Loader>): (
+					[0, 1, 2].map((index) => (
+						<TextAreaField
+							key={index}
+							isReadOnly={true}
+							value={suggestions[index] || "Waiting for suggestions..."}
+							backgroundColor="white"
+							autoHeight={true}
+							minHeight="16px"
+							maxHeight="50px"
+							padding="2px 8px"
+							style={{
+								resize: 'none',
+								overflow: 'auto',
+								lineHeight: '1.2',
+								fontSize: '13px',
+								border: '1px solid #ccc',
+								borderRadius: '4px',
+								marginBottom: '2px',
+								cursor: 'pointer'
+							}}
+							onClick={() => {
+								if (suggestions[index]) {
+									onSuggestionClick(suggestions[index]);
+								}
+							}}
+						/>
+					))
+				)}
+				
 			</Flex>
 		</>
 	)
