@@ -3,35 +3,148 @@ import { useRef, useState } from 'react'
 import { Storage } from 'aws-amplify'
 import { VoiceRecorder } from '../VoiceRecorder/VoiceRecorder'
 
-export const InputArea = ({ onMessageSend }) => {
+export const InputArea = ({ onMessageSend, messages = [], inputText, setInputText, onSuggestionsReceived }) => {
 	const [selectedImage, setSelectedImage] = useState(null)
-	const [messageText, setMessageText] = useState('')
+	const [lastAudioKey, setLastAudioKey] = useState(null)
 	const fileInputRef = useRef(null)
+
+	const getConversationHistory = () => {
+		// Get last 3 messages only to keep context manageable
+		return messages
+			.slice(0, 3)  // Take only last 3 messages
+			.reverse()    // Most recent messages first
+			.map(msg => `${msg.owner}: ${msg.content?.text || ''}`.slice(0, 80)) // Limit each message to 80 chars
+			.join('\n')   // Join with newlines
+	}
 
 	const uploadFile = async (selectedPic) => {
 		const { key } = await Storage.put(selectedPic.name, selectedPic, {
-			contentType: selectedPic.type,
+				contentType: selectedPic.type,
 		})
 		return key
 	}
 
 	const handleVoiceRecorded = async (audioKey) => {
+		setLastAudioKey(audioKey)
 		onMessageSend('', audioKey, 'audio')
+		
+		await fetchSuggestions('')
 	}
+
+	// Helper function to ensure text is within limits
+	const truncateToLimit = (text) => {
+		return text.slice(-255);  // Take last 255 characters
+	}
+
+	const fetchSuggestions = async (newMessage) => {
+		try {
+			const conversationHistory = getConversationHistory()
+			const fullText = truncateToLimit(`${conversationHistory}\n${newMessage}`)
+
+			const bucketName = "amplifynextjschatappe467b698899b41e3b4b88ef2124"
+			const s3Path = lastAudioKey ? `s3://${bucketName}/${lastAudioKey}` : ""
+			console.log("newMessage", newMessage)
+			const response = await fetch('http://35.77.89.181/v1/workflows/run', {
+				method: 'POST',
+				headers: {
+					'Authorization': 'Bearer app-RmWlW1p1VAQilrrzmaQpMJaC',
+					'Content-Type': 'application/json'
+				},
+				
+				body: JSON.stringify({
+					inputs: {
+						text: newMessage,
+						file_path: s3Path,
+						username: "warren",
+						"sys.files": [],
+						"sys.user_id": "346ab516-948d-42e1-b54b-2b002ac93f86",
+						"sys.app_id": "be3ed3f2-2419-48bf-a872-db27ad10760b",
+						"sys.workflow_id": "64807ddc-cd37-4525-9944-a2ca6f697a1e",
+						"sys.workflow_run_id": "54400afb-ffc5-4600-ad5f-2b165a12512b"
+					},
+					response_mode: "blocking",
+					user: "abc-123"
+				})
+			});
+			
+			setLastAudioKey(null)
+			
+			const data = await response.json();
+			if (data.error) {
+				console.error('API Error:', data.error);
+				return;
+			}
+			console.log("data?.data?.outputs?.result", data?.data?.outputs?.result)
+			if (data?.data?.outputs?.result && (typeof data.data.outputs.result !== 'string' || data.data.outputs.result.indexOf("suggestions") !== -1)) {
+				const resultData = JSON.parse(data.data.outputs.result);
+				console.log("resultData", resultData)
+				onSuggestionsReceived(resultData.suggestions);
+			}
+		} catch (error) {
+			console.error('Error fetching suggestions:', error);
+		}
+	};
+	
 
 	const handleFormSubmit = async (e) => {
 		e.preventDefault()
-		if (!messageText.trim() && !selectedImage) return
+		console.log("inputText", inputText)
+		if(typeof inputText === 'array') inputText = inputText[0]
+		if (!inputText.trim() && !selectedImage) return
 
 		let key
 		if (selectedImage) {
 			key = await uploadFile(selectedImage)
-			onMessageSend(messageText.trim(), key, 'image')
+			await onMessageSend(inputText.trim(), key, 'image')
 		} else {
-			onMessageSend(messageText.trim())
+			await onMessageSend(inputText.trim())
 		}
 
-		setMessageText('')
+		// First API call for suggestions
+		await fetchSuggestions(inputText.trim())
+
+		// Second API call for the third suggestion
+		try {
+			const response = await fetch('http://35.77.89.181/v1/workflows/run', {
+				method: 'POST',
+				headers: {
+					'Authorization': 'Bearer app-8nyFh08HKFaPNEFYvdwQIBqK',
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					inputs: {
+						user_input: inputText.trim()
+					},
+					response_mode: "blocking",
+					user: "abc-123"
+				})
+			});
+
+			let thirdSuggestion = '';
+			const data = await response.json();
+			if (data.error) {
+				console.error('API Error:', data.error);
+				return;
+			}
+			if (data?.data?.outputs?.text) {
+				const resultData = data.data.outputs.text;
+				// onSuggestionsReceived(resultData);
+				
+				onSuggestionsReceived(prevSuggestions => {
+					const newSuggestions = [...(prevSuggestions || [])];
+					newSuggestions[2] = resultData; // Set third suggestion
+					return newSuggestions;
+				});
+			}
+
+			
+
+		} catch (error) {
+			console.error('Error fetching streaming suggestion:', error);
+		}
+
+		// Clear input
+		setInputText('')
 		setSelectedImage(null)
 		if (fileInputRef.current) {
 			fileInputRef.current.value = ''
@@ -46,27 +159,41 @@ export const InputArea = ({ onMessageSend }) => {
 	}
 
 	return (
-		<Flex direction="column" padding="1rem" gap="1rem">
-			<form onSubmit={handleFormSubmit}>
-				<Flex direction="row" gap="1rem">
+		<Flex direction="column" padding="1rem" width="100%">
+			<form onSubmit={handleFormSubmit} style={{ width: '100%' }}>
+				<Flex 
+					direction="row" 
+					gap="0.5rem" 
+					width="100%"
+					 alignItems="center"
+					justifyContent="space-between"
+				>
 					<TextField
 						flex="1"
 						placeholder="Type your message..."
-						value={messageText}
-						onChange={(e) => setMessageText(e.target.value)}
+						value={inputText}
+						onChange={(e) => setInputText(e.target.value)}
 						onKeyPress={handleKeyPress}
+						size="large"
+						style={{
+							minWidth: '75%',
+							height: '40px'
+						}}
 					/>
-					<TextField
-						ref={fileInputRef}
-						type="file"
-						onChange={(e) => setSelectedImage(e.target.files[0])}
-					/>
-					<Button type="submit" variation="primary">
+					<VoiceRecorder onVoiceRecorded={handleVoiceRecorded} />
+					<Button 
+						type="submit" 
+						variation="primary"
+						size="large"
+						style={{
+							width: '80px',
+							height: '40px'
+						}}
+					>
 						Send
 					</Button>
 				</Flex>
 			</form>
-			<VoiceRecorder onVoiceRecorded={handleVoiceRecorded} />
 		</Flex>
 	)
 }

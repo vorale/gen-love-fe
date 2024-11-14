@@ -1,0 +1,41 @@
+.voiceRecorder {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+}
+
+.recordButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.recordButton:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.cancelButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.cancelButton:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.recordingTimer {
+  color: #ff4444;
+  font-size: 14px;
+  min-width: 45px;
+} 

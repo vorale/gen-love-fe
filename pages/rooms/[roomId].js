@@ -20,6 +20,49 @@ function RoomPage({ roomsList, currentRoomData, username }) {
 	const [messages, setMessages] = useState([])
 	const [rooms, setRooms] = useState(roomsList)
 	const [currentRoom, setCurrentRoom] = useState(currentRoomData)
+	const [suggestions, setSuggestions] = useState([])
+	const [inputText, setInputText] = useState('')
+
+	// const fetchSuggestions = async (messages, newMessage = '') => {
+	// 	try {
+	// 		const conversationHistory = messages
+	// 			.slice()
+	// 			.reverse()
+	// 			.map(msg => `${msg.owner}: ${msg.content?.text || ''}`)
+	// 			.join('\n');
+
+	// 		const fullText = newMessage ? `${conversationHistory}\n${newMessage}` : conversationHistory;
+
+	// 		const response = await fetch('http://35.77.89.181/v1/workflows/run', {
+	// 			method: 'POST',
+	// 			headers: {
+	// 				'Authorization': 'Bearer app-RmWlW1p1VAQilrrzmaQpMJaC',
+	// 				'Content-Type': 'application/json'
+	// 			},
+	// 			body: JSON.stringify({
+	// 				inputs: {
+	// 					text: "",
+	// 					file_path: "",
+	// 					username: "warren",
+	// 					"sys.files": [],
+	// 					"sys.user_id": "346ab516-948d-42e1-b54b-2b002ac93f86",
+	// 					"sys.app_id": "be3ed3f2-2419-48bf-a872-db27ad10760b",
+	// 					"sys.workflow_id": "64807ddc-cd37-4525-9944-a2ca6f697a1e",
+	// 					"sys.workflow_run_id": "54400afb-ffc5-4600-ad5f-2b165a12512b"
+	// 				},
+	// 				response_mode: "blocking",
+	// 				user: "abc-123"
+	// 			})
+	// 		});
+	// 		const data = await response.json();
+    //         if (data?.data?.outputs?.result) {
+	// 			const resultData = JSON.parse(data.data.outputs.result);
+	// 			setSuggestions(resultData.suggestions);
+	// 		}
+	// 	} catch (error) {
+	// 		console.error('Error fetching suggestions:', error);
+	// 	}
+	// };
 
 	const handleMessageSend = async (newMessage, mediaKey, mediaType = 'image') => {
 		const createNewMsg = async (text, mediaKey, mediaType) => {
@@ -52,20 +95,34 @@ function RoomPage({ roomsList, currentRoomData, username }) {
 		router.push(`/rooms/${roomID}`)
 	}
 
+	const handleSuggestionClick = (suggestion) => {
+		setInputText(suggestion);
+	};
+
+	const handleSuggestionsReceived = (suggestionsOrUpdater) => {
+		if (typeof suggestionsOrUpdater === 'function') {
+			setSuggestions(suggestionsOrUpdater);
+		} else {
+			setSuggestions(suggestionsOrUpdater);
+		}
+	};
+
 	useEffect(() => {
 		if (!currentRoom?.id) return;
 		
 		API.graphql({
 			query: messagesByRoomIdAndCreatedAt,
-			variables: {
-				roomId: currentRoom.id,
-				sortDirection: 'DESC',
-				limit: 50
-			},
+				variables: {
+					roomId: currentRoom.id,
+					sortDirection: 'DESC',
+					limit: 50
+				},
 		}).then(({ data }) => {
-			setMessages(data.messagesByRoomIdAndCreatedAt.items);
+			const messageItems = data.messagesByRoomIdAndCreatedAt.items;
+			setMessages(messageItems);
+			// fetchSuggestions(messageItems);
 		});
-	}, [currentRoom?.id])
+	}, [currentRoom?.id]);
 
 	useEffect(() => {
 		if (!currentRoom?.id) return;
@@ -79,7 +136,11 @@ function RoomPage({ roomsList, currentRoomData, username }) {
 			},
 		}).subscribe({
 			next: ({ value }) => {
-				setMessages((messages) => [value.data.onCreateMessage, ...messages]);
+				setMessages((messages) => {
+					const newMessages = [value.data.onCreateMessage, ...messages];
+					// fetchSuggestions(newMessages);
+					return newMessages;
+				});
 			},
 			error: (error) => console.warn(error),
 		});
@@ -104,8 +165,19 @@ function RoomPage({ roomsList, currentRoomData, username }) {
 								{currentRoom.name}
 							</Heading>
 							<Flex direction="column" height="85vh">
-								<MessageList messages={messages} myUsername={username} />
-								<InputArea onMessageSend={handleMessageSend} />
+								<MessageList 
+									messages={messages} 
+									myUsername={username} 
+									suggestions={suggestions}
+									onSuggestionClick={handleSuggestionClick}
+								/>
+								<InputArea 
+									onMessageSend={handleMessageSend} 
+									messages={messages}
+									inputText={inputText}
+									setInputText={setInputText}
+									onSuggestionsReceived={handleSuggestionsReceived}
+								/>
 							</Flex>
 						</View>
 					</View>

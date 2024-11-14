@@ -96,16 +96,13 @@ export const messagesByRoomIdAndCreatedAt = /* GraphQL */ `
           text
           imageId
           audioId
-          __typename
         }
         roomId
         owner
         createdAt
         updatedAt
-        __typename
       }
       nextToken
-      __typename
     }
   }
 `;

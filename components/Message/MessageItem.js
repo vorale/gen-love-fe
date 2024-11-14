@@ -20,8 +20,6 @@ export const MessageItem = ({ msg, myUsername }) => {
 		getMediaUrl()
 	}, [msg])
 
-	console.log('Message object:', msg)
-
 	if (!msg) return null
 
 	return (

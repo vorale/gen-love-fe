@@ -28,5 +28,35 @@
         }
       }
     }
+  },
+  "staging": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-amplifynextjschatapp-staging-3e55d-authRole",
+      "UnauthRoleArn": "arn:aws:iam::034362076319:role/amplify-amplifynextjschatapp-staging-3e55d-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::034362076319:role/amplify-amplifynextjschatapp-staging-3e55d-authRole",
+      "Region": "ap-northeast-1",
+      "DeploymentBucketName": "amplify-amplifynextjschatapp-staging-3e55d-deployment",
+      "UnauthRoleName": "amplify-amplifynextjschatapp-staging-3e55d-unauthRole",
+      "StackName": "amplify-amplifynextjschatapp-staging-3e55d",
+      "StackId": "arn:aws:cloudformation:ap-northeast-1:034362076319:stack/amplify-amplifynextjschatapp-staging-3e55d/74b22800-a254-11ef-964e-06c6f03bd47d",
+      "AmplifyAppId": "d2nvb9xm9n26t9"
+    },
+    "categories": {
+      "auth": {
+        "amplifynextjschatappea1ecfa5": {}
+      },
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "d2nvb9xm9n26t9",
+          "type": "manual"
+        }
+      },
+      "api": {
+        "amplifynextjschatapp": {}
+      },
+      "storage": {
+        "mediarepo": {}
+      }
+    }
   }
 }
