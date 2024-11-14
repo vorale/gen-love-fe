@@ -3,7 +3,7 @@ import { useRef, useState } from 'react'
 import { Storage } from 'aws-amplify'
 import { VoiceRecorder } from '../VoiceRecorder/VoiceRecorder'
 
-export const InputArea = ({ onMessageSend, messages = [], inputText, setInputText, onSuggestionsReceived, setIsSuggestionsOpen, setIsLoading, isLoading}) => {
+export const InputArea = ({ onMessageSend, messages = [], inputText, setInputText, onSuggestionsReceived, setIsSuggestionsOpen, setIsLoading,setGeneralText, isLoading}) => {
 	const [selectedImage, setSelectedImage] = useState(null)
 	const [lastAudioKey, setLastAudioKey] = useState(null)
 	const fileInputRef = useRef(null)
@@ -80,6 +80,7 @@ export const InputArea = ({ onMessageSend, messages = [], inputText, setInputTex
 				const resultData = JSON.parse(data.data.outputs.result);
 				console.log("resultData", resultData)
 				onSuggestionsReceived(resultData.suggestions);
+				setGeneralText(resultData.general_context)
 			}
 		} catch (error) {
 			console.error('Error fetching suggestions:', error);
@@ -179,7 +180,7 @@ export const InputArea = ({ onMessageSend, messages = [], inputText, setInputTex
 				>
 					<TextField
 						flex="1"
-						width="60%"
+						width="50%"
 						placeholder="Type your message..."
 						value={inputText}
 						onChange={(e) => setInputText(e.target.value)}

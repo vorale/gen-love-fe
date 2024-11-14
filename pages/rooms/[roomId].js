@@ -24,6 +24,7 @@ function RoomPage({ roomsList, currentRoomData, username }) {
 	const [inputText, setInputText] = useState('')
 	const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false)
 	const [isLoading, setIsLoading] = useState(false)
+	const [generalText, setGeneralText] = useState('')
 
 	// const fetchSuggestions = async (messages, newMessage = '') => {
 	// 	try {
@@ -169,6 +170,7 @@ function RoomPage({ roomsList, currentRoomData, username }) {
 							</Heading>
 							<Flex direction="column" height="85vh">
 								<MessageList 
+									generalText={generalText}
 									isLoading={isLoading}
 									isSuggestionsOpen={isSuggestionsOpen}
 									messages={messages} 
@@ -178,6 +180,7 @@ function RoomPage({ roomsList, currentRoomData, username }) {
 								/>
 								<InputArea 
 									setIsSuggestionsOpen={setIsSuggestionsOpen}
+									setGeneralText={setGeneralText}
 									onMessageSend={handleMessageSend} 
 									setIsLoading={setIsLoading}
 									isLoading={isLoading}
