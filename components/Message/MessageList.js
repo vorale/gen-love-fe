@@ -24,13 +24,13 @@ export const MessageList = ({ messages = [], myUsername,generalText, isLoading, 
 				padding="0.5rem"
 				display={isSuggestionsOpen ? "block" : "none"}
 				// visibility={isSuggestionsOpen ? "visible" : "hidden"}
-				backgroundColor="#f5f5f5"
+				backgroundColor="green"
 				minHeight="25px"
 				gap="0.25rem"
 			>
 				{isLoading?(<Loader></Loader>): (
 					<div>
-						<Heading style={{width: '100%',marginLeft: '15px', marginRight: '15px', color: 'green'}} level={6}>{generalText}</Heading>
+						<Heading style={{width: '100%',marginLeft: '15px', marginRight: '15px', color: 'white'}} level={6}>{generalText}</Heading>
 						{
 							[0, 1, 2].map((index) => (
 								<TextAreaField
