@@ -37,7 +37,7 @@ export const InputArea = ({ onMessageSend, messages = [], inputText, setInputTex
 		return text.slice(-255);  // Take last 255 characters
 	}
 
-	const fetchSuggestions = async (newMessage) => {
+	const fetchSuggestions = async (newMessage, username) => {
 		try {
 			const conversationHistory = getConversationHistory()
 			const fullText = truncateToLimit(`${conversationHistory}\n${newMessage}`)
@@ -56,7 +56,7 @@ export const InputArea = ({ onMessageSend, messages = [], inputText, setInputTex
 					inputs: {
 						text: newMessage,
 						file_path: s3Path,
-						username: "warren",
+						username: username,
 						"sys.files": [],
 						"sys.user_id": "346ab516-948d-42e1-b54b-2b002ac93f86",
 						"sys.app_id": "be3ed3f2-2419-48bf-a872-db27ad10760b",
@@ -90,8 +90,12 @@ export const InputArea = ({ onMessageSend, messages = [], inputText, setInputTex
 	const handleSuggestionsOpen = async () => {
 		setIsSuggestionsOpen(true)
 		setIsLoading(true)
+		const lastMsg = messages[messages.length-1]
+		console.log("lastMsg", lastMsg)
+
+		if(lastMsg && lastMsg.content && lastMsg.content.text) {
 		// First API call for suggestions
-		await fetchSuggestions(inputText.trim())
+		await fetchSuggestions(lastMsg.content.text,lastMsg.owner)
 
 		// Second API call for the third suggestion
 		try {
@@ -106,7 +110,7 @@ export const InputArea = ({ onMessageSend, messages = [], inputText, setInputTex
 						user_input: inputText.trim()
 					},
 					response_mode: "blocking",
-					user: "abc-123"
+					user: lastMsg.owner
 				})
 			});
 
@@ -132,6 +136,7 @@ export const InputArea = ({ onMessageSend, messages = [], inputText, setInputTex
 		} catch (error) {
 			console.error('Error fetching streaming suggestion:', error);
 		}
+	}
 		setIsLoading(false)
 	}
 	
